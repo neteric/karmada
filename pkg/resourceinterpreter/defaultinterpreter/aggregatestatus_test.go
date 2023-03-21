@@ -542,6 +542,21 @@ func TestAggregatePodStatus(t *testing.T) {
 		"containerStatuses": []corev1.ContainerStatus{newContainerStatusesSucceeded[0]},
 		"phase":             corev1.PodSucceeded,
 	}
+	statusMap5 := map[string]interface{}{
+		"containerStatuses": []corev1.ContainerStatus{containerStatuses1[1]},
+		"phase":             corev1.PodRunning,
+		"hostIP":            "2.2.2.2",
+		"podIP":             "1.1.1.1",
+		"podIPs":            []map[string]string{{"ip": "1.1.1.1"}},
+		"qosClass":          "BestEffort",
+		"conditions": []map[string]string{
+			{
+				"status": "True",
+				"type":   "PodScheduled",
+			},
+		},
+	}
+	raw5, _ := helper.BuildStatusRawExtension(statusMap5)
 
 	rawRunning, _ := helper.BuildStatusRawExtension(statusMapRunning)
 
@@ -568,6 +583,25 @@ func TestAggregatePodStatus(t *testing.T) {
 		{ClusterName: "member2", Status: rawSucceeded, Applied: true},
 	}
 
+	aggregatedStatusItems5 := []workv1alpha2.AggregatedStatusItem{
+		{ClusterName: "member1", Status: raw5, Applied: true},
+	}
+	newObj5, _ := helper.ToUnstructured(&corev1.Pod{Status: corev1.PodStatus{
+		ContainerStatuses: []corev1.ContainerStatus{containerStatuses1[1]},
+		Phase:             corev1.PodRunning,
+		HostIP:            "2.2.2.2",
+		PodIP:             "1.1.1.1",
+		PodIPs: []corev1.PodIP{
+			{IP: "1.1.1.1"},
+		},
+		QOSClass: "BestEffort",
+		Conditions: []corev1.PodCondition{
+			{
+				Status: "True",
+				Type:   "PodScheduled",
+			},
+		},
+	}})
 	succeededObj, _ := helper.ToUnstructured(&corev1.Pod{Status: corev1.PodStatus{
 		ContainerStatuses: []corev1.ContainerStatus{containerStatusesRunning[0], newContainerStatusesSucceeded[0]},
 		Phase:             corev1.PodRunning,
@@ -620,6 +654,12 @@ func TestAggregatePodStatus(t *testing.T) {
 			curObj:                curObj,
 			aggregatedStatusItems: aggregatedStatusItemsPending, //  Running + nil => Pending
 			expectedObj:           pendingObj,
+		},
+		{
+			name:                  "fully pod status",
+			curObj:                curObj,
+			aggregatedStatusItems: aggregatedStatusItems5, //  Running + nil => Pending
+			expectedObj:           newObj5,
 		},
 	}
 

@@ -360,6 +360,15 @@ func aggregatePodStatus(object *unstructured.Unstructured, aggregatedStatusItems
 		return helper.ToUnstructured(pod)
 	}
 
+	if len(aggregatedStatusItems) == 1 {
+		temp := &corev1.PodStatus{}
+		if err = json.Unmarshal(aggregatedStatusItems[0].Status.Raw, temp); err != nil {
+			return nil, err
+		}
+		pod.Status = *temp.DeepCopy()
+		return helper.ToUnstructured(pod)
+	}
+
 	newStatus := &corev1.PodStatus{}
 	newStatus.ContainerStatuses = make([]corev1.ContainerStatus, 0)
 	podPhases := sets.NewString()
