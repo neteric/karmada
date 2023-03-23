@@ -1,0 +1,1432 @@
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  generateName: test-zk1-
+  labels:
+    app: test-zk1
+    controller-by: zookeeper-manager
+    controller-revision-hash: test-zk1-bbffc89d5
+    kind: ZookeeperMember
+    propagationpolicy.karmada.io/name: test-zk1-pod0-propagationpolicy
+    propagationpolicy.karmada.io/namespace: zookeeper-system
+    statefulset.kubernetes.io/pod-name: test-zk1-0
+  name: test-zk1-0
+  namespace: zookeeper-system
+  ownerReferences:
+  - apiVersion: apps/v1
+    blockOwnerDeletion: true
+    controller: true
+    kind: StatefulSet
+    name: test-zk1
+    uid: 6901fe2d-2eea-4c70-8ff8-0ea1a8086091
+  resourceVersion: "1860237"
+  uid: 3f9d0dce-51b2-4520-ae05-43084313e1db
+spec:
+  affinity:
+    podAntiAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchLabels:
+            app: test-zk1
+        topologyKey: kubernetes.io/hostname
+  containers:
+  - command:
+    - /usr/local/bin/zookeeperStart.sh
+    image: dmall-bj.tencentcloudcr.com/symcn/dmall-zookeeper:3.4.14
+    imagePullPolicy: Always
+    lifecycle:
+      preStop:
+        exec:
+          command:
+          - zookeeperTeardown.sh
+    livenessProbe:
+      exec:
+        command:
+        - zookeeperLive.sh
+      failureThreshold: 3
+      initialDelaySeconds: 10
+      periodSeconds: 10
+      successThreshold: 1
+      timeoutSeconds: 10
+    name: zookeeper
+    ports:
+    - containerPort: 2181
+      name: client
+      protocol: TCP
+    - containerPort: 2888
+      name: quorum
+      protocol: TCP
+    - containerPort: 3888
+      name: leader-election
+      protocol: TCP
+    - containerPort: 7000
+      name: metrics
+      protocol: TCP
+    - containerPort: 8080
+      name: admin-server
+      protocol: TCP
+    readinessProbe:
+      exec:
+        command:
+        - zookeeperReady.sh
+      failureThreshold: 3
+      initialDelaySeconds: 10
+      periodSeconds: 10
+      successThreshold: 1
+      timeoutSeconds: 10
+    resources:
+      limits:
+        cpu: 300m
+        memory: 512Mi
+      requests:
+        cpu: 300m
+        memory: 512Mi
+    terminationMessagePath: /dev/termination-log
+    terminationMessagePolicy: File
+    volumeMounts:
+    - mountPath: /data
+      name: data
+    - mountPath: /conf
+      name: conf
+  dnsPolicy: ClusterFirst
+  enableServiceLinks: true
+  hostname: test-zk1-0
+  imagePullSecrets:
+  - name: dmall-bj-tencentcloudcr-registry-secret
+  preemptionPolicy: PreemptLowerPriority
+  priority: 0
+  restartPolicy: Always
+  schedulerName: default-scheduler
+  securityContext: {}
+  serviceAccount: default
+  serviceAccountName: default
+  subdomain: test-zk1-headless
+  terminationGracePeriodSeconds: 30
+  tolerations:
+  - effect: NoExecute
+    key: node.kubernetes.io/not-ready
+    operator: Exists
+    tolerationSeconds: 300
+  - effect: NoExecute
+    key: node.kubernetes.io/unreachable
+    operator: Exists
+    tolerationSeconds: 300
+  volumes:
+  - name: data
+    persistentVolumeClaim:
+      claimName: data-test-zk1-0
+  - configMap:
+      defaultMode: 420
+      name: test-zk1-configmap
+    name: conf
+status:
+  conditions:
+  - lastProbeTime: null
+    lastTransitionTime: "2023-03-09T09:46:42Z"
+    status: "True"
+    type: Initialized
+  - lastProbeTime: null
+    lastTransitionTime: "2023-03-09T09:48:02Z"
+    status: "True"
+    type: Ready
+  - lastProbeTime: null
+    lastTransitionTime: "2023-03-09T09:48:02Z"
+    status: "True"
+    type: ContainersReady
+  - lastProbeTime: null
+    lastTransitionTime: "2023-03-09T09:46:42Z"
+    status: "True"
+    type: PodScheduled
+  containerStatuses:
+  - containerID: containerd://a5dc0d2c1f570b8d19e49b569a63ef92d819d9fab9ed2c444d75db04135051ec
+    image: dmall-bj.tencentcloudcr.com/symcn/dmall-zookeeper:3.4.14
+    imageID: dmall-bj.tencentcloudcr.com/symcn/dmall-zookeeper@sha256:eed567f4939df67e0dff708b130716aa4a58130e12ccbc8e894ace3ef3430d11
+    lastState: {}
+    name: zookeeper
+    ready: true
+    restartCount: 0
+    started: true
+    state:
+      running:
+        startedAt: "2023-03-09T09:47:47Z"
+  hostIP: 10.48.49.8
+  phase: Running
+  podIP: 10.48.228.57
+  podIPs:
+  - ip: 10.48.228.57
+  qosClass: Guaranteed
+  startTime: "2023-03-09T09:46:42Z"
+---
+apiVersion: policy.karmada.io/v1alpha1
+kind: PropagationPolicy
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"policy.karmada.io/v1alpha1","kind":"PropagationPolicy","metadata":{"annotations":{},"name":"test-zk-0-propagation","namespace":"default"},"spec":{"placement":{"clusterAffinity":{"clusterNames":["new-mid"]}},"resourceSelectors":[{"apiVersion":"v1","kind":"Pod","labelSelector":{"matchLabels":{"app":"test-zk1","controller-by":"zookeeper-manager"}}}]}}
+  creationTimestamp: "2023-03-06T02:39:30Z"
+  generation: 1
+  name: test-zk-0-propagation
+  namespace: default
+  resourceVersion: "1386683"
+  uid: 73ed0eaa-9cc0-4317-bab9-3f55be89538e
+spec:
+  placement:
+    clusterAffinity:
+      clusterNames:
+      - new-mid
+    clusterTolerations:
+    - effect: NoExecute
+      key: cluster.karmada.io/not-ready
+      operator: Exists
+      tolerationSeconds: 300
+    - effect: NoExecute
+      key: cluster.karmada.io/unreachable
+      operator: Exists
+      tolerationSeconds: 300
+  priority: 0
+  resourceSelectors:
+  - apiVersion: v1
+    kind: Pod
+    labelSelector:
+      matchLabels:
+        app: test-zk1
+        controller-by: zookeeper-manager
+    namespace: default
+  schedulerName: default-scheduler
+---
+apiVersion: policy.karmada.io/v1alpha1
+kind: OverridePolicy
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"policy.karmada.io/v1alpha1","kind":"OverridePolicy","metadata":{"annotations":{},"name":"test-zk1-svc0-overridepolicy","namespace":"zookeeper-system"},"spec":{"overrideRules":[{"overriders":{"annotationsOverrider":[{"operator":"replace","value":{"service.kubernetes.io/qcloud-loadbalancer-internal-subnetid":"subnet-6fvy27e7"}}]},"targetCluster":{"clusterNames":["new-mid"]}}],"resourceSelectors":[{"apiVersion":"v1","kind":"Service","labelSelector":{"matchLabels":{"app":"test-zk1","controller-by":"zookeeper-manager","type":"client-service"}}}]}}
+  creationTimestamp: "2023-03-06T05:06:39Z"
+  generation: 1
+  name: test-zk1-svc0-overridepolicy
+  namespace: zookeeper-system
+  resourceVersion: "1403713"
+  uid: 5c759f16-7d80-41e0-8234-ca07a2b2c065
+spec:
+  overrideRules:
+  - overriders:
+      annotationsOverrider:
+      - operator: replace
+        value:
+          service.kubernetes.io/qcloud-loadbalancer-internal-subnetid: subnet-6fvy27e7
+    targetCluster:
+      clusterNames:
+      - new-mid
+  overriders: {}
+  resourceSelectors:
+  - apiVersion: v1
+    kind: Service
+    labelSelector:
+      matchLabels:
+        app: test-zk1
+        controller-by: zookeeper-manager
+        type: client-service
+    namespace: zookeeper-system
+---
+apiVersion: work.karmada.io/v1alpha2
+kind: ResourceBinding
+metadata:
+  annotations:
+    policy.karmada.io/applied-placement: '{"clusterTolerations":[{"key":"cluster.karmada.io/not-ready","operator":"Exists","effect":"NoExecute","tolerationSeconds":300},{"key":"cluster.karmada.io/unreachable","operator":"Exists","effect":"NoExecute","tolerationSeconds":300}],"spreadConstraints":[{"spreadByField":"cluster","maxGroups":1,"minGroups":1}]}'
+  creationTimestamp: "2023-03-09T09:30:09Z"
+  finalizers:
+  - karmada.io/binding-controller
+  generation: 5
+  labels:
+    propagationpolicy.karmada.io/name: test-zk1-pod0-propagationpolicy
+    propagationpolicy.karmada.io/namespace: zookeeper-system
+  name: test-zk1-0-pod
+  namespace: zookeeper-system
+  ownerReferences:
+  - apiVersion: v1
+    blockOwnerDeletion: true
+    controller: true
+    kind: Pod
+    name: test-zk1-0
+    uid: 3f9d0dce-51b2-4520-ae05-43084313e1db
+  resourceVersion: "1860236"
+  uid: 79346bbd-5c67-4c16-afdc-a37b185ee3ee
+spec:
+  clusters:
+  - name: new-mid
+  placement:
+    clusterTolerations:
+    - effect: NoExecute
+      key: cluster.karmada.io/not-ready
+      operator: Exists
+      tolerationSeconds: 300
+    - effect: NoExecute
+      key: cluster.karmada.io/unreachable
+      operator: Exists
+      tolerationSeconds: 300
+    spreadConstraints:
+    - maxGroups: 1
+      minGroups: 1
+      spreadByField: cluster
+  resource:
+    apiVersion: v1
+    kind: Pod
+    name: test-zk1-0
+    namespace: zookeeper-system
+    resourceVersion: "1860049"
+    uid: 3f9d0dce-51b2-4520-ae05-43084313e1db
+  schedulerName: default-scheduler
+status:
+  aggregatedStatus:
+  - applied: true
+    clusterName: new-mid
+    health: Unknown
+    status:
+      conditions:
+      - lastProbeTime: null
+        lastTransitionTime: "2023-03-09T09:46:42Z"
+        status: "True"
+        type: Initialized
+      - lastProbeTime: null
+        lastTransitionTime: "2023-03-09T09:48:02Z"
+        status: "True"
+        type: Ready
+      - lastProbeTime: null
+        lastTransitionTime: "2023-03-09T09:48:02Z"
+        status: "True"
+        type: ContainersReady
+      - lastProbeTime: null
+        lastTransitionTime: "2023-03-09T09:46:42Z"
+        status: "True"
+        type: PodScheduled
+      containerStatuses:
+      - containerID: containerd://a5dc0d2c1f570b8d19e49b569a63ef92d819d9fab9ed2c444d75db04135051ec
+        image: dmall-bj.tencentcloudcr.com/symcn/dmall-zookeeper:3.4.14
+        imageID: dmall-bj.tencentcloudcr.com/symcn/dmall-zookeeper@sha256:eed567f4939df67e0dff708b130716aa4a58130e12ccbc8e894ace3ef3430d11
+        lastState: {}
+        name: zookeeper
+        ready: true
+        restartCount: 0
+        started: true
+        state:
+          running:
+            startedAt: "2023-03-09T09:47:47Z"
+      hostIP: 10.48.49.8
+      phase: Running
+      podIP: 10.48.228.57
+      podIPs:
+      - ip: 10.48.228.57
+      qosClass: Guaranteed
+      startTime: "2023-03-09T09:46:42Z"
+  conditions:
+  - lastTransitionTime: "2023-03-09T09:46:42Z"
+    message: All works have been successfully applied
+    reason: FullyAppliedSuccess
+    status: "True"
+    type: FullyApplied
+  - lastTransitionTime: "2023-03-09T09:46:42Z"
+    message: Binding has been scheduled
+    reason: BindingScheduled
+    status: "True"
+    type: Scheduled
+  schedulerObservedGeneration: 5
+---
+apiVersion: work.karmada.io/v1alpha1
+kind: Work
+metadata:
+  annotations:
+    resourcebinding.karmada.io/name: test-zk1-0-pod
+    resourcebinding.karmada.io/namespace: zookeeper-system
+  creationTimestamp: "2023-03-09T09:46:42Z"
+  finalizers:
+  - karmada.io/execution-controller
+  generation: 1
+  labels:
+    resourcebinding.karmada.io/key: 5c9bf9cfb6
+  name: test-zk1-0-7ff95cbf8d
+  namespace: karmada-es-new-mid
+  resourceVersion: "4333042"
+  uid: 1c8b4336-8682-498a-b073-5fdc0662642c
+spec:
+  workload:
+    manifests:
+    - apiVersion: v1
+      kind: Pod
+      metadata:
+        annotations:
+          resourcebinding.karmada.io/name: test-zk1-0-pod
+          resourcebinding.karmada.io/namespace: zookeeper-system
+          resourcetemplate.karmada.io/managed-annotations: resourcebinding.karmada.io/name,resourcebinding.karmada.io/namespace,resourcetemplate.karmada.io/managed-annotations,resourcetemplate.karmada.io/managed-labels,resourcetemplate.karmada.io/uid
+          resourcetemplate.karmada.io/managed-labels: app,controller-by,controller-revision-hash,kind,propagationpolicy.karmada.io/name,propagationpolicy.karmada.io/namespace,resourcebinding.karmada.io/key,statefulset.kubernetes.io/pod-name,work.karmada.io/name,work.karmada.io/namespace
+          resourcetemplate.karmada.io/uid: 3f9d0dce-51b2-4520-ae05-43084313e1db
+        generateName: test-zk1-
+        labels:
+          app: test-zk1
+          controller-by: zookeeper-manager
+          controller-revision-hash: test-zk1-bbffc89d5
+          kind: ZookeeperMember
+          propagationpolicy.karmada.io/name: test-zk1-pod0-propagationpolicy
+          propagationpolicy.karmada.io/namespace: zookeeper-system
+          resourcebinding.karmada.io/key: 5c9bf9cfb6
+          statefulset.kubernetes.io/pod-name: test-zk1-0
+          work.karmada.io/name: test-zk1-0-7ff95cbf8d
+          work.karmada.io/namespace: karmada-es-new-mid
+        name: test-zk1-0
+        namespace: zookeeper-system
+      spec:
+        affinity:
+          podAntiAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchLabels:
+                  app: test-zk1
+              topologyKey: kubernetes.io/hostname
+        containers:
+        - command:
+          - /usr/local/bin/zookeeperStart.sh
+          image: dmall-bj.tencentcloudcr.com/symcn/dmall-zookeeper:3.4.14
+          imagePullPolicy: Always
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                - zookeeperTeardown.sh
+          livenessProbe:
+            exec:
+              command:
+              - zookeeperLive.sh
+            failureThreshold: 3
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 10
+          name: zookeeper
+          ports:
+          - containerPort: 2181
+            name: client
+            protocol: TCP
+          - containerPort: 2888
+            name: quorum
+            protocol: TCP
+          - containerPort: 3888
+            name: leader-election
+            protocol: TCP
+          - containerPort: 7000
+            name: metrics
+            protocol: TCP
+          - containerPort: 8080
+            name: admin-server
+            protocol: TCP
+          readinessProbe:
+            exec:
+              command:
+              - zookeeperReady.sh
+            failureThreshold: 3
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 10
+          resources:
+            limits:
+              cpu: 300m
+              memory: 512Mi
+            requests:
+              cpu: 300m
+              memory: 512Mi
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+          - mountPath: /data
+            name: data
+          - mountPath: /conf
+            name: conf
+        dnsPolicy: ClusterFirst
+        enableServiceLinks: true
+        hostname: test-zk1-0
+        imagePullSecrets:
+        - name: dmall-bj-tencentcloudcr-registry-secret
+        preemptionPolicy: PreemptLowerPriority
+        priority: 0
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        serviceAccount: default
+        serviceAccountName: default
+        subdomain: test-zk1-headless
+        terminationGracePeriodSeconds: 30
+        tolerations:
+        - effect: NoExecute
+          key: node.kubernetes.io/not-ready
+          operator: Exists
+          tolerationSeconds: 300
+        - effect: NoExecute
+          key: node.kubernetes.io/unreachable
+          operator: Exists
+          tolerationSeconds: 300
+        volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: data-test-zk1-0
+        - configMap:
+            defaultMode: 420
+            name: test-zk1-configmap
+          name: conf
+status:
+  conditions:
+  - lastTransitionTime: "2023-03-09T09:46:42Z"
+    message: Manifest has been successfully applied
+    reason: AppliedSuccessful
+    status: "True"
+    type: Applied
+  manifestStatuses:
+  - health: Unknown
+    identifier:
+      kind: Pod
+      name: test-zk1-0
+      namespace: zookeeper-system
+      ordinal: 0
+      resource: ""
+      version: v1
+    status:
+      conditions:
+      - lastProbeTime: null
+        lastTransitionTime: "2023-03-09T09:46:42Z"
+        status: "True"
+        type: Initialized
+      - lastProbeTime: null
+        lastTransitionTime: "2023-03-09T09:48:02Z"
+        status: "True"
+        type: Ready
+      - lastProbeTime: null
+        lastTransitionTime: "2023-03-09T09:48:02Z"
+        status: "True"
+        type: ContainersReady
+      - lastProbeTime: null
+        lastTransitionTime: "2023-03-09T09:46:42Z"
+        status: "True"
+        type: PodScheduled
+      containerStatuses:
+      - containerID: containerd://a5dc0d2c1f570b8d19e49b569a63ef92d819d9fab9ed2c444d75db04135051ec
+        image: dmall-bj.tencentcloudcr.com/symcn/dmall-zookeeper:3.4.14
+        imageID: dmall-bj.tencentcloudcr.com/symcn/dmall-zookeeper@sha256:eed567f4939df67e0dff708b130716aa4a58130e12ccbc8e894ace3ef3430d11
+        lastState: {}
+        name: zookeeper
+        ready: true
+        restartCount: 0
+        started: true
+        state:
+          running:
+            startedAt: "2023-03-09T09:47:47Z"
+      hostIP: 10.48.49.8
+      phase: Running
+      podIP: 10.48.228.57
+      podIPs:
+      - ip: 10.48.228.57
+      qosClass: Guaranteed
+      startTime: "2023-03-09T09:46:42Z"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  annotations:
+    resourcebinding.karmada.io/name: test-zk1-0-pod
+    resourcebinding.karmada.io/namespace: zookeeper-system
+    resourcetemplate.karmada.io/managed-annotations: resourcebinding.karmada.io/name,resourcebinding.karmada.io/namespace,resourcetemplate.karmada.io/managed-annotations,resourcetemplate.karmada.io/managed-labels,resourcetemplate.karmada.io/uid
+    resourcetemplate.karmada.io/managed-labels: app,controller-by,controller-revision-hash,kind,propagationpolicy.karmada.io/name,propagationpolicy.karmada.io/namespace,resourcebinding.karmada.io/key,statefulset.kubernetes.io/pod-name,work.karmada.io/name,work.karmada.io/namespace
+    resourcetemplate.karmada.io/uid: 3f9d0dce-51b2-4520-ae05-43084313e1db
+    tke.cloud.tencent.com/networks-status: |-
+      [{
+          "name": "tke-bridge",
+          "interface": "eth0",
+          "ips": [
+              "10.48.228.57"
+          ],
+          "mac": "36:ee:73:a3:2b:c9",
+          "default": true,
+          "dns": {}
+      }]
+  creationTimestamp: "2023-03-09T09:46:42Z"
+  generateName: test-zk1-
+  labels:
+    app: test-zk1
+    controller-by: zookeeper-manager
+    controller-revision-hash: test-zk1-bbffc89d5
+    kind: ZookeeperMember
+    propagationpolicy.karmada.io/name: test-zk1-pod0-propagationpolicy
+    propagationpolicy.karmada.io/namespace: zookeeper-system
+    resourcebinding.karmada.io/key: 5c9bf9cfb6
+    statefulset.kubernetes.io/pod-name: test-zk1-0
+    test: test123
+    work.karmada.io/name: test-zk1-0-7ff95cbf8d
+    work.karmada.io/namespace: karmada-es-new-mid
+  name: test-zk1-0
+  namespace: zookeeper-system
+  resourceVersion: "9721009425"
+  selfLink: /api/v1/namespaces/zookeeper-system/pods/test-zk1-0
+  uid: 054b7706-99de-4dfd-8ebe-32dfbedc1491
+spec:
+  affinity:
+    podAntiAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchLabels:
+            app: test-zk1
+        topologyKey: kubernetes.io/hostname
+  containers:
+  - command:
+    - /usr/local/bin/zookeeperStart.sh
+    image: dmall-bj.tencentcloudcr.com/symcn/dmall-zookeeper:3.4.14
+    imagePullPolicy: Always
+    lifecycle:
+      preStop:
+        exec:
+          command:
+          - zookeeperTeardown.sh
+    livenessProbe:
+      exec:
+        command:
+        - zookeeperLive.sh
+      failureThreshold: 3
+      initialDelaySeconds: 10
+      periodSeconds: 10
+      successThreshold: 1
+      timeoutSeconds: 10
+    name: zookeeper
+    ports:
+    - containerPort: 2181
+      name: client
+      protocol: TCP
+    - containerPort: 2888
+      name: quorum
+      protocol: TCP
+    - containerPort: 3888
+      name: leader-election
+      protocol: TCP
+    - containerPort: 7000
+      name: metrics
+      protocol: TCP
+    - containerPort: 8080
+      name: admin-server
+      protocol: TCP
+    readinessProbe:
+      exec:
+        command:
+        - zookeeperReady.sh
+      failureThreshold: 3
+      initialDelaySeconds: 10
+      periodSeconds: 10
+      successThreshold: 1
+      timeoutSeconds: 10
+    resources:
+      limits:
+        cpu: 300m
+        memory: 512Mi
+      requests:
+        cpu: 300m
+        memory: 512Mi
+    terminationMessagePath: /dev/termination-log
+    terminationMessagePolicy: File
+    volumeMounts:
+    - mountPath: /data
+      name: data
+    - mountPath: /conf
+      name: conf
+    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+      name: kube-api-access-scm8t
+      readOnly: true
+  dnsPolicy: ClusterFirst
+  enableServiceLinks: true
+  hostname: test-zk1-0
+  imagePullSecrets:
+  - name: dmall-bj-tencentcloudcr-registry-secret
+  nodeName: 10.48.49.8
+  preemptionPolicy: PreemptLowerPriority
+  priority: 0
+  restartPolicy: Always
+  schedulerName: default-scheduler
+  securityContext: {}
+  serviceAccount: default
+  serviceAccountName: default
+  subdomain: test-zk1-headless
+  terminationGracePeriodSeconds: 30
+  tolerations:
+  - effect: NoExecute
+    key: node.kubernetes.io/not-ready
+    operator: Exists
+    tolerationSeconds: 300
+  - effect: NoExecute
+    key: node.kubernetes.io/unreachable
+    operator: Exists
+    tolerationSeconds: 300
+  volumes:
+  - name: data
+    persistentVolumeClaim:
+      claimName: data-test-zk1-0
+  - configMap:
+      defaultMode: 420
+      name: test-zk1-configmap
+    name: conf
+  - name: kube-api-access-scm8t
+    projected:
+      defaultMode: 420
+      sources:
+      - serviceAccountToken:
+          expirationSeconds: 3607
+          path: token
+      - configMap:
+          items:
+          - key: ca.crt
+            path: ca.crt
+          name: kube-root-ca.crt
+      - downwardAPI:
+          items:
+          - fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
+            path: namespace
+status:
+  conditions:
+  - lastProbeTime: null
+    lastTransitionTime: "2023-03-09T09:46:42Z"
+    status: "True"
+    type: Initialized
+  - lastProbeTime: null
+    lastTransitionTime: "2023-03-09T09:48:02Z"
+    status: "True"
+    type: Ready
+  - lastProbeTime: null
+    lastTransitionTime: "2023-03-09T09:48:02Z"
+    status: "True"
+    type: ContainersReady
+  - lastProbeTime: null
+    lastTransitionTime: "2023-03-09T09:46:42Z"
+    status: "True"
+    type: PodScheduled
+  containerStatuses:
+  - containerID: containerd://a5dc0d2c1f570b8d19e49b569a63ef92d819d9fab9ed2c444d75db04135051ec
+    image: dmall-bj.tencentcloudcr.com/symcn/dmall-zookeeper:3.4.14
+    imageID: dmall-bj.tencentcloudcr.com/symcn/dmall-zookeeper@sha256:eed567f4939df67e0dff708b130716aa4a58130e12ccbc8e894ace3ef3430d11
+    lastState: {}
+    name: zookeeper
+    ready: true
+    restartCount: 0
+    started: true
+    state:
+      running:
+        startedAt: "2023-03-09T09:47:47Z"
+  hostIP: 10.48.49.8
+  phase: Running
+  podIP: 10.48.228.57
+  podIPs:
+  - ip: 10.48.228.57
+  qosClass: Guaranteed
+  startTime: "2023-03-09T09:46:42Z"
+---
+apiVersion: cluster.karmada.io/v1alpha1
+kind: Cluster
+metadata:
+  creationTimestamp: "2023-02-24T02:30:09Z"
+  finalizers:
+  - karmada.io/cluster-controller
+  name: new-mid
+  resourceVersion: "5708205"
+  uid: df018e2b-6139-457f-b4e1-057cd473fa7e
+spec:
+  apiEndpoint: https://cls-jfsfj3q7.ccs.tencent-cloud.com
+  id: 3085ac87-bfac-4918-af69-7df5d7b18b4b
+  impersonatorSecretRef:
+    name: new-mid-impersonator
+    namespace: karmada-cluster
+  provider: tencent
+  region: cd
+  resourceModels:
+  - grade: 0
+    ranges:
+    - max: "1"
+      min: "0"
+      name: cpu
+    - max: 4Gi
+      min: "0"
+      name: memory
+  - grade: 1
+    ranges:
+    - max: "2"
+      min: "1"
+      name: cpu
+    - max: 16Gi
+      min: 4Gi
+      name: memory
+  - grade: 2
+    ranges:
+    - max: "4"
+      min: "2"
+      name: cpu
+    - max: 32Gi
+      min: 16Gi
+      name: memory
+  - grade: 3
+    ranges:
+    - max: "8"
+      min: "4"
+      name: cpu
+    - max: 64Gi
+      min: 32Gi
+      name: memory
+  - grade: 4
+    ranges:
+    - max: "16"
+      min: "8"
+      name: cpu
+    - max: 128Gi
+      min: 64Gi
+      name: memory
+  - grade: 5
+    ranges:
+    - max: "32"
+      min: "16"
+      name: cpu
+    - max: 256Gi
+      min: 128Gi
+      name: memory
+  - grade: 6
+    ranges:
+    - max: "64"
+      min: "32"
+      name: cpu
+    - max: 512Gi
+      min: 256Gi
+      name: memory
+  - grade: 7
+    ranges:
+    - max: "128"
+      min: "64"
+      name: cpu
+    - max: 1Ti
+      min: 512Gi
+      name: memory
+  - grade: 8
+    ranges:
+    - max: "9223372036854775807"
+      min: "128"
+      name: cpu
+    - max: "9223372036854775807"
+      min: 1Ti
+      name: memory
+  secretRef:
+    name: new-mid
+    namespace: karmada-cluster
+  syncMode: Push
+  zone: az01
+status:
+  apiEnablements:
+  - groupVersion: admissionregistration.k8s.io/v1
+    resources:
+    - kind: MutatingWebhookConfiguration
+      name: mutatingwebhookconfigurations
+    - kind: ValidatingWebhookConfiguration
+      name: validatingwebhookconfigurations
+  - groupVersion: agent.k8s.elastic.co/v1alpha1
+    resources:
+    - kind: Agent
+      name: agents
+  - groupVersion: analysis.crane.io/v1alpha1
+    resources:
+    - kind: Analytics
+      name: analytics
+    - kind: RecommendationRule
+      name: recommendationrules
+    - kind: Recommendation
+      name: recommendations
+  - groupVersion: apiextensions.k8s.io/v1
+    resources:
+    - kind: CustomResourceDefinition
+      name: customresourcedefinitions
+  - groupVersion: apiregistration.k8s.io/v1
+    resources:
+    - kind: APIService
+      name: apiservices
+  - groupVersion: apm.k8s.elastic.co/v1
+    resources:
+    - kind: ApmServer
+      name: apmservers
+  - groupVersion: apm.k8s.elastic.co/v1beta1
+    resources:
+    - kind: ApmServer
+      name: apmservers
+  - groupVersion: apps/v1
+    resources:
+    - kind: ControllerRevision
+      name: controllerrevisions
+    - kind: DaemonSet
+      name: daemonsets
+    - kind: Deployment
+      name: deployments
+    - kind: ReplicaSet
+      name: replicasets
+    - kind: StatefulSet
+      name: statefulsets
+  - groupVersion: authentication.k8s.io/v1
+    resources:
+    - kind: TokenReview
+      name: tokenreviews
+  - groupVersion: authorization.k8s.io/v1
+    resources:
+    - kind: LocalSubjectAccessReview
+      name: localsubjectaccessreviews
+    - kind: SelfSubjectAccessReview
+      name: selfsubjectaccessreviews
+    - kind: SelfSubjectRulesReview
+      name: selfsubjectrulesreviews
+    - kind: SubjectAccessReview
+      name: subjectaccessreviews
+  - groupVersion: autoscaling.crane.io/v1alpha1
+    resources:
+    - kind: EffectiveHorizontalPodAutoscaler
+      name: effectivehorizontalpodautoscalers
+    - kind: EffectiveVerticalPodAutoscaler
+      name: effectiveverticalpodautoscalers
+    - kind: Substitute
+      name: substitutes
+  - groupVersion: autoscaling.internal.knative.dev/v1alpha1
+    resources:
+    - kind: Metric
+      name: metrics
+    - kind: PodAutoscaler
+      name: podautoscalers
+  - groupVersion: autoscaling.k8s.io/v1
+    resources:
+    - kind: VerticalPodAutoscalerCheckpoint
+      name: verticalpodautoscalercheckpoints
+    - kind: VerticalPodAutoscaler
+      name: verticalpodautoscalers
+  - groupVersion: autoscaling.k8s.io/v1beta2
+    resources:
+    - kind: VerticalPodAutoscalerCheckpoint
+      name: verticalpodautoscalercheckpoints
+    - kind: VerticalPodAutoscaler
+      name: verticalpodautoscalers
+  - groupVersion: autoscaling/v1
+    resources:
+    - kind: HorizontalPodAutoscaler
+      name: horizontalpodautoscalers
+  - groupVersion: autoscaling/v2beta1
+    resources:
+    - kind: HorizontalPodAutoscaler
+      name: horizontalpodautoscalers
+  - groupVersion: autoscaling/v2beta2
+    resources:
+    - kind: HorizontalPodAutoscaler
+      name: horizontalpodautoscalers
+  - groupVersion: basefeatures.symcn.com/v1alpha1
+    resources:
+    - kind: BaseFeature
+      name: basefeatures
+  - groupVersion: batch/v1
+    resources:
+    - kind: CronJob
+      name: cronjobs
+    - kind: Job
+      name: jobs
+  - groupVersion: batch/v1beta1
+    resources:
+    - kind: CronJob
+      name: cronjobs
+  - groupVersion: beat.k8s.elastic.co/v1beta1
+    resources:
+    - kind: Beat
+      name: beats
+  - groupVersion: caching.internal.knative.dev/v1alpha1
+    resources:
+    - kind: Image
+      name: images
+  - groupVersion: certificates.k8s.io/v1
+    resources:
+    - kind: CertificateSigningRequest
+      name: certificatesigningrequests
+  - groupVersion: cloud.tencent.com/v1alpha1
+    resources:
+    - kind: TkeServiceConfig
+      name: tkeserviceconfigs
+  - groupVersion: coordination.k8s.io/v1
+    resources:
+    - kind: Lease
+      name: leases
+  - groupVersion: custom.metrics.k8s.io/v1beta1
+  - groupVersion: dashboard.tekton.dev/v1alpha1
+    resources:
+    - kind: Extension
+      name: extensions
+  - groupVersion: discovery.k8s.io/v1
+    resources:
+    - kind: EndpointSlice
+      name: endpointslices
+  - groupVersion: discovery.k8s.io/v1beta1
+    resources:
+    - kind: EndpointSlice
+      name: endpointslices
+  - groupVersion: dm.rocketmq.gitlab.dmall.com/v1alpha1
+    resources:
+    - kind: NameService
+      name: nameservices
+    - kind: RmqBroker
+      name: rmqbrokers
+  - groupVersion: elasticsearch.k8s.elastic.co/v1
+    resources:
+    - kind: Elasticsearch
+      name: elasticsearches
+  - groupVersion: elasticsearch.k8s.elastic.co/v1beta1
+    resources:
+    - kind: Elasticsearch
+      name: elasticsearches
+  - groupVersion: ensurance.crane.io/v1alpha1
+    resources:
+    - kind: AvoidanceAction
+      name: avoidanceactions
+    - kind: NodeQOS
+      name: nodeqoss
+    - kind: PodQOS
+      name: podqoss
+  - groupVersion: enterprisesearch.k8s.elastic.co/v1
+    resources:
+    - kind: EnterpriseSearch
+      name: enterprisesearches
+  - groupVersion: enterprisesearch.k8s.elastic.co/v1beta1
+    resources:
+    - kind: EnterpriseSearch
+      name: enterprisesearches
+  - groupVersion: eventing.knative.dev/v1
+    resources:
+    - kind: Broker
+      name: brokers
+    - kind: Trigger
+      name: triggers
+  - groupVersion: eventing.knative.dev/v1beta1
+    resources:
+    - kind: EventType
+      name: eventtypes
+  - groupVersion: events.k8s.io/v1
+    resources:
+    - kind: Event
+      name: events
+  - groupVersion: events.k8s.io/v1beta1
+    resources:
+    - kind: Event
+      name: events
+  - groupVersion: external.metrics.k8s.io/v1beta1
+  - groupVersion: flowcontrol.apiserver.k8s.io/v1beta1
+    resources:
+    - kind: FlowSchema
+      name: flowschemas
+    - kind: PriorityLevelConfiguration
+      name: prioritylevelconfigurations
+  - groupVersion: flows.knative.dev/v1
+    resources:
+    - kind: Parallel
+      name: parallels
+    - kind: Sequence
+      name: sequences
+  - groupVersion: install.istio.io/v1alpha1
+    resources:
+    - kind: IstioOperator
+      name: istiooperators
+  - groupVersion: kafka.dmall.com/v1alpha1
+    resources:
+    - kind: KafkaTopic
+      name: kafkatopics
+    - kind: KafkaUser
+      name: kafkausers
+  - groupVersion: kafka.dmall.com/v1beta1
+    resources:
+    - kind: KafkaCluster
+      name: kafkaclusters
+  - groupVersion: keda.sh/v1alpha1
+    resources:
+    - kind: ClusterTriggerAuthentication
+      name: clustertriggerauthentications
+    - kind: ScaledJob
+      name: scaledjobs
+    - kind: ScaledObject
+      name: scaledobjects
+    - kind: TriggerAuthentication
+      name: triggerauthentications
+  - groupVersion: kibana.k8s.elastic.co/v1
+    resources:
+    - kind: Kibana
+      name: kibanas
+  - groupVersion: kibana.k8s.elastic.co/v1beta1
+    resources:
+    - kind: Kibana
+      name: kibanas
+  - groupVersion: maps.k8s.elastic.co/v1alpha1
+    resources:
+    - kind: ElasticMapsServer
+      name: elasticmapsservers
+  - groupVersion: messaging.knative.dev/v1
+    resources:
+    - kind: Channel
+      name: channels
+    - kind: Subscription
+      name: subscriptions
+  - groupVersion: metrics.k8s.io/v1beta1
+    resources:
+    - kind: NodeMetrics
+      name: nodes
+    - kind: PodMetrics
+      name: pods
+  - groupVersion: monitor.tencent.io/v1alpha1
+    resources:
+    - kind: CustomMetrics
+      name: custommetrics
+  - groupVersion: monitoring.coreos.com/v1
+    resources:
+    - kind: Alertmanager
+      name: alertmanagers
+    - kind: PodMonitor
+      name: podmonitors
+    - kind: Probe
+      name: probes
+    - kind: Prometheus
+      name: prometheuses
+    - kind: PrometheusRule
+      name: prometheusrules
+    - kind: ServiceMonitor
+      name: servicemonitors
+    - kind: ThanosRuler
+      name: thanosrulers
+  - groupVersion: monitoring.coreos.com/v1alpha1
+    resources:
+    - kind: AlertmanagerConfig
+      name: alertmanagerconfigs
+  - groupVersion: multicluster.x-k8s.io/v1alpha1
+    resources:
+    - kind: ServiceExport
+      name: serviceexports
+    - kind: ServiceImport
+      name: serviceimports
+  - groupVersion: mysql.presslabs.org/v1alpha1
+    resources:
+    - kind: MysqlBackup
+      name: mysqlbackups
+    - kind: MysqlCluster
+      name: mysqlclusters
+    - kind: MysqlDatabase
+      name: mysqldatabases
+    - kind: MysqlUser
+      name: mysqlusers
+  - groupVersion: networking.internal.knative.dev/v1alpha1
+    resources:
+    - kind: Certificate
+      name: certificates
+    - kind: ClusterDomainClaim
+      name: clusterdomainclaims
+    - kind: Ingress
+      name: ingresses
+    - kind: ServerlessService
+      name: serverlessservices
+  - groupVersion: networking.istio.io/v1alpha3
+    resources:
+    - kind: DestinationRule
+      name: destinationrules
+    - kind: EnvoyFilter
+      name: envoyfilters
+    - kind: Gateway
+      name: gateways
+    - kind: ServiceEntry
+      name: serviceentries
+    - kind: Sidecar
+      name: sidecars
+    - kind: VirtualService
+      name: virtualservices
+    - kind: WorkloadEntry
+      name: workloadentries
+    - kind: WorkloadGroup
+      name: workloadgroups
+  - groupVersion: networking.istio.io/v1beta1
+    resources:
+    - kind: DestinationRule
+      name: destinationrules
+    - kind: Gateway
+      name: gateways
+    - kind: ServiceEntry
+      name: serviceentries
+    - kind: Sidecar
+      name: sidecars
+    - kind: VirtualService
+      name: virtualservices
+    - kind: WorkloadEntry
+      name: workloadentries
+  - groupVersion: networking.k8s.io/v1
+    resources:
+    - kind: IngressClass
+      name: ingressclasses
+    - kind: Ingress
+      name: ingresses
+    - kind: NetworkPolicy
+      name: networkpolicies
+  - groupVersion: networking.tke.cloud.tencent.com/v1
+    resources:
+    - kind: EIPClaim
+      name: eipclaims
+  - groupVersion: networking.tke.cloud.tencent.com/v1alpha1
+    resources:
+    - kind: LoadBalancerResource
+      name: loadbalancerresources
+  - groupVersion: node.k8s.io/v1
+    resources:
+    - kind: RuntimeClass
+      name: runtimeclasses
+  - groupVersion: node.k8s.io/v1beta1
+    resources:
+    - kind: RuntimeClass
+      name: runtimeclasses
+  - groupVersion: policy/v1
+    resources:
+    - kind: PodDisruptionBudget
+      name: poddisruptionbudgets
+  - groupVersion: policy/v1beta1
+    resources:
+    - kind: PodDisruptionBudget
+      name: poddisruptionbudgets
+    - kind: PodSecurityPolicy
+      name: podsecuritypolicies
+  - groupVersion: prediction.crane.io/v1alpha1
+    resources:
+    - kind: ClusterNodePrediction
+      name: clusternodepredictions
+    - kind: TimeSeriesPrediction
+      name: timeseriespredictions
+  - groupVersion: rbac.authorization.k8s.io/v1
+    resources:
+    - kind: ClusterRoleBinding
+      name: clusterrolebindings
+    - kind: ClusterRole
+      name: clusterroles
+    - kind: RoleBinding
+      name: rolebindings
+    - kind: Role
+      name: roles
+  - groupVersion: scheduling.k8s.io/v1
+    resources:
+    - kind: PriorityClass
+      name: priorityclasses
+  - groupVersion: security.istio.io/v1beta1
+    resources:
+    - kind: AuthorizationPolicy
+      name: authorizationpolicies
+    - kind: PeerAuthentication
+      name: peerauthentications
+    - kind: RequestAuthentication
+      name: requestauthentications
+  - groupVersion: serving.knative.dev/v1
+    resources:
+    - kind: Configuration
+      name: configurations
+    - kind: Revision
+      name: revisions
+    - kind: Route
+      name: routes
+    - kind: Service
+      name: services
+  - groupVersion: serving.knative.dev/v1alpha1
+    resources:
+    - kind: DomainMapping
+      name: domainmappings
+  - groupVersion: snapshot.storage.k8s.io/v1beta1
+    resources:
+    - kind: VolumeSnapshotClass
+      name: volumesnapshotclasses
+    - kind: VolumeSnapshotContent
+      name: volumesnapshotcontents
+    - kind: VolumeSnapshot
+      name: volumesnapshots
+  - groupVersion: sources.knative.dev/v1
+    resources:
+    - kind: ApiServerSource
+      name: apiserversources
+    - kind: ContainerSource
+      name: containersources
+    - kind: PingSource
+      name: pingsources
+    - kind: SinkBinding
+      name: sinkbindings
+  - groupVersion: sources.knative.dev/v1beta2
+    resources:
+    - kind: PingSource
+      name: pingsources
+  - groupVersion: storage.k8s.io/v1
+    resources:
+    - kind: CSIDriver
+      name: csidrivers
+    - kind: CSINode
+      name: csinodes
+    - kind: StorageClass
+      name: storageclasses
+    - kind: VolumeAttachment
+      name: volumeattachments
+  - groupVersion: storage.k8s.io/v1beta1
+    resources:
+    - kind: CSIStorageCapacity
+      name: csistoragecapacities
+  - groupVersion: sts-workload.github.com/v1alpha1
+    resources:
+    - kind: ZookeeperCluster
+      name: zookeeperclusters
+  - groupVersion: tekton.dev/v1alpha1
+    resources:
+    - kind: ClusterTask
+      name: clustertasks
+    - kind: Condition
+      name: conditions
+    - kind: PipelineResource
+      name: pipelineresources
+    - kind: PipelineRun
+      name: pipelineruns
+    - kind: Pipeline
+      name: pipelines
+    - kind: Run
+      name: runs
+    - kind: TaskRun
+      name: taskruns
+    - kind: Task
+      name: tasks
+  - groupVersion: tekton.dev/v1beta1
+    resources:
+    - kind: ClusterTask
+      name: clustertasks
+    - kind: PipelineRun
+      name: pipelineruns
+    - kind: Pipeline
+      name: pipelines
+    - kind: TaskRun
+      name: taskruns
+    - kind: Task
+      name: tasks
+  - groupVersion: telemetry.istio.io/v1alpha1
+    resources:
+    - kind: Telemetry
+      name: telemetries
+  - groupVersion: topology.crane.io/v1alpha1
+    resources:
+    - kind: NodeResourceTopology
+      name: noderesourcetopologies
+  - groupVersion: traefik.containo.us/v1alpha1
+    resources:
+    - kind: IngressRoute
+      name: ingressroutes
+    - kind: IngressRouteTCP
+      name: ingressroutetcps
+    - kind: IngressRouteUDP
+      name: ingressrouteudps
+    - kind: Middleware
+      name: middlewares
+    - kind: MiddlewareTCP
+      name: middlewaretcps
+    - kind: ServersTransport
+      name: serverstransports
+    - kind: TLSOption
+      name: tlsoptions
+    - kind: TLSStore
+      name: tlsstores
+    - kind: TraefikService
+      name: traefikservices
+  - groupVersion: v1
+    resources:
+    - kind: Binding
+      name: bindings
+    - kind: ComponentStatus
+      name: componentstatuses
+    - kind: ConfigMap
+      name: configmaps
+    - kind: Endpoints
+      name: endpoints
+    - kind: Event
+      name: events
+    - kind: LimitRange
+      name: limitranges
+    - kind: Namespace
+      name: namespaces
+    - kind: Node
+      name: nodes
+    - kind: PersistentVolumeClaim
+      name: persistentvolumeclaims
+    - kind: PersistentVolume
+      name: persistentvolumes
+    - kind: Pod
+      name: pods
+    - kind: PodTemplate
+      name: podtemplates
+    - kind: ReplicationController
+      name: replicationcontrollers
+    - kind: ResourceQuota
+      name: resourcequotas
+    - kind: Secret
+      name: secrets
+    - kind: ServiceAccount
+      name: serviceaccounts
+    - kind: Service
+      name: services
+  - groupVersion: workload.dmall.com/v1
+    resources:
+    - kind: RedisFailover
+      name: redisfailovers
+  - groupVersion: workload.dmall.com/v1beta1
+    resources:
+    - kind: AdvDeployment
+      name: advdeployments
+    - kind: AppSet
+      name: appsets
+    - kind: Cluster
+      name: clusters
+    - kind: SymciJob
+      name: symcijobs
+    - kind: Symci
+      name: symcis
+  conditions:
+  - lastTransitionTime: "2023-02-24T02:30:11Z"
+    message: cluster is healthy and ready to accept workloads
+    reason: ClusterReady
+    status: "True"
+    type: Ready
+  kubernetesVersion: v1.22.5-tke.6
+  nodeSummary:
+    readyNum: 12
+    totalNum: 12
+  resourceSummary:
+    allocatable:
+      cpu: 70200m
+      ephemeral-storage: "807060137067"
+      hugepages-1Gi: "0"
+      hugepages-2Mi: "0"
+      kubernetes.io/batch-cpu: "27710"
+      kubernetes.io/batch-memory: "42957260629"
+      memory: 253045048Ki
+      pods: "1500"
+      tke.cloud.tencent.com/eip: "0"
+      tke.cloud.tencent.com/eni-ip: "0"
+    allocatableModelings:
+    - count: 9
+      grade: 0
+    - count: 3
+      grade: 1
+    - count: 0
+      grade: 2
+    - count: 0
+      grade: 3
+    - count: 0
+      grade: 4
+    - count: 0
+      grade: 5
+    - count: 0
+      grade: 6
+    - count: 0
+      grade: 7
+    - count: 0
+      grade: 8
+    allocated:
+      cpu: 54525m
+      memory: 208988768k
+      pods: "300"
+    allocating:
+      cpu: 300m
+      memory: 512Mi
+      pods: "1"

@@ -1,0 +1,22 @@
+@startuml
+
+skin rose
+
+title "Karmada Cluster Controller"
+
+
+database "ApiServer" as ApiServer
+entity "ClusterController" as cc
+
+
+ApiServer -> cc : Watch
+
+note right
+Cluster
+end note
+
+ApiServer -> cc: Cluster Event（Create,Update,Delete)
+
+
+@enduml
+

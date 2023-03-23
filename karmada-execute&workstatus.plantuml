@@ -1,0 +1,41 @@
+@startuml
+
+skin rose
+
+title "Messages - Sequence Diagram"
+
+
+
+actor User
+database "KarmadaEtcd" as cp
+database "Member1" as m1
+database "Member2" as m2
+
+entity "WorkStatus" as wsc
+entity "Execute" as exec
+
+
+cp -> wsc: work(manifest:pod) event: (create, update, delete)
+cp -> exec:  work(manifest:pod) event: (create, update, delete)
+
+
+group exec
+    cp -> exec: work event: (create, update, delete)
+    exec -> m1: pod action: (create, update, delete)
+    exec -> m2: pod action: (create, update, delete)
+    exec -> cp: update work status-conditions
+end
+
+wsc -> m1: watch pod
+wsc -> m2: watch pod
+
+
+group workstatus
+    m1 -> wsc: pod event: (create, update, delete)
+    m2 -> wsc: pod event: (create, update, delete)
+    wsc -> m1: pod action: (recreate, update)
+    wsc -> m2: pod action: (recreate, update)
+    wsc -> cp: update work status
+end
+
+@enduml

@@ -1,0 +1,46 @@
+@startuml
+
+skin rose
+
+title "Karmada BindingController"
+
+
+database "ApiServer" as ApiServer
+entity "BindingController" as binding
+
+
+ApiServer -> binding : Watch
+
+note right
+ResourceBinding
+OverridePolicy
+ClusterOverridePolicy
+end note
+
+ApiServer -> binding: ResourceBinding Event（Create,Update,Delete)
+group DeleteEvent
+    binding -> ApiServer: if !binding.DeletionTimestamp.IsZero(), Delete Work About this RB
+    binding -> ApiServer: removeFinalizer
+end
+
+group UpdateEvent
+    binding -> ApiServer: deleting this orphan Works
+    note right
+        if RB updated and cluster update, if works.clusters not in rb
+    end note
+end
+
+binding -> binding: merge Target Clusters from rb and attachbinding
+
+note right
+    if a object is required by another and is has own policy
+end note
+
+binding -> binding: revise replica for rb in member cluster
+binding -> binding: ApplyOverridePolicies
+binding -> binding: RecordAppliedOverrides
+
+binding -> ApiServer: CreateOrUpdateWork 
+
+@enduml
+

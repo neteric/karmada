@@ -1,0 +1,23 @@
+@startuml
+
+skin rose
+
+title "Karmada Scheduler"
+
+
+database "ApiServer" as ApiServer
+entity "Scheduler" as sch
+
+
+ApiServer -> sch : Watch
+
+note right
+ResourceBinding
+ClusterResourceBinding
+Cluster
+end note
+
+sch -> ApiServer : ResourceBinding.Spec.Cluster
+
+@enduml
+
