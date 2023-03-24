@@ -361,8 +361,13 @@ func aggregatePodStatus(object *unstructured.Unstructured, aggregatedStatusItems
 	}
 
 	if len(aggregatedStatusItems) == 1 {
+		item := aggregatedStatusItems[0]
 		temp := &corev1.PodStatus{}
-		if err = json.Unmarshal(aggregatedStatusItems[0].Status.Raw, temp); err != nil {
+		if item.Status == nil {
+			// maybe pod's status hasn't been collected yet, assume it's in pending state.
+			// Otherwise, it may affect the final aggregated state.
+			temp.Phase = corev1.PodPending
+		} else if err = json.Unmarshal(item.Status.Raw, temp); err != nil {
 			return nil, err
 		}
 		pod.Status = *temp.DeepCopy()
