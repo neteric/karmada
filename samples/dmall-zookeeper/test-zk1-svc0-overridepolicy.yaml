@@ -1,0 +1,23 @@
+apiVersion: policy.karmada.io/v1alpha1
+kind: OverridePolicy
+metadata:
+  name: test-zk1-svc0-overridepolicy
+  namespace: zookeeper-system
+spec: 
+  resourceSelectors: 
+  - apiVersion: v1
+    kind: Service
+    labelSelector:
+      matchLabels:
+        app: test-zk1
+        controller-by: zookeeper-manager
+        type: client-service
+  overrideRules: 
+  - targetCluster: 
+      clusterNames:
+      - new-mid
+    overriders:
+      annotationsOverrider:
+        - operator: replace
+          value: 
+            service.kubernetes.io/qcloud-loadbalancer-internal-subnetid: subnet-6fvy27e7

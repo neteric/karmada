@@ -1,0 +1,21 @@
+apiVersion: multicluster.x-k8s.io/v1alpha1
+kind: ServiceExport
+metadata:
+  name: test-zk1-client
+  namespace: zookeeper-system
+---
+apiVersion: policy.karmada.io/v1alpha1
+kind: PropagationPolicy
+metadata:
+  name: test-zk1-client-export-policy
+  namespace: zookeeper-system
+spec:
+  resourceSelectors:
+    - apiVersion: multicluster.x-k8s.io/v1alpha1
+      kind: ServiceExport
+      name: test-zk1-client
+      namespace: zookeeper-system
+  placement:
+    clusterAffinity:
+      clusterNames:
+        - new-mid

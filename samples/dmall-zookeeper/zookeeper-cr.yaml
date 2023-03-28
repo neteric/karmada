@@ -1,0 +1,50 @@
+apiVersion: sts-workload.github.com/v1alpha1
+kind: ZookeeperCluster
+metadata:
+  name: multicluster-zk-1
+  namespace: zookeeper-system
+spec:
+  replicas: 2
+  image: dmall-bj.tencentcloudcr.com/symcn/dmall-zookeeper:3.4.14
+  persistence:
+    reclaimPolicy: Delete
+    spec:
+      storageClassName: "cbs"
+      accessModes:
+        - ReadWriteOnce
+      volumeMode: Filesystem
+      resources:
+        requests:
+          storage: 10Gi
+  useDynamicReconfig: false
+  useCustomConfig: false
+  pod:
+    resources:
+      requests:
+        memory: "512Mi"
+        cpu: "300m"
+      limits:
+        memory: "512Mi"
+        cpu: "300m"
+    imagePullSecrets:
+      - name: dmall-bj-tencentcloudcr-registry-secret
+  clientService:
+    annotations:
+      service.kubernetes.io/qcloud-loadbalancer-internal-subnetid: "subnet-d90xxx8r"
+    type: LoadBalancer
+  config:
+    initLimit: 5
+    tickTime: 2000
+    syncLimit: 5
+    globalOutstandingLimit: 1000
+    preAllocSize: 65536
+    snapCount: 10000
+    commitLogCount: 500
+    snapSizeLimitInKb: 4194304
+    maxClientCnxns: 2000
+    maxCnxns: 20000
+    minSessionTimeout: 4000
+    maxSessionTimeout: 40000
+    autoPurgeSnapRetainCount: 3
+    autoPurgePurgeInterval: 1
+

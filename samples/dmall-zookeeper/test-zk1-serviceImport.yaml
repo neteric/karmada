@@ -1,0 +1,26 @@
+apiVersion: multicluster.x-k8s.io/v1alpha1
+kind: ServiceImport
+metadata:
+  name: test-zk1-client
+  namespace: zookeeper-system
+spec:
+  type: ClusterSetIP
+  ports:
+  - port: 2181
+    protocol: TCP
+---
+apiVersion: policy.karmada.io/v1alpha1
+kind: PropagationPolicy
+metadata:
+  name: test-zk1-client-import-policy
+  namespace: zookeeper-system
+spec:
+  resourceSelectors:
+    - apiVersion: multicluster.x-k8s.io/v1alpha1
+      kind: ServiceImport
+      name: test-zk1-client
+      namespace: zookeeper-system
+  placement:
+    clusterAffinity:
+      clusterNames:
+        - new-mid-rz
