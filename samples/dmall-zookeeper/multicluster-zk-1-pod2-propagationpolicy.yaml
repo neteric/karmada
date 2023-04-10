@@ -1,0 +1,16 @@
+apiVersion: policy.karmada.io/v1alpha1
+kind: PropagationPolicy
+metadata:
+  name: multicluster-zk-1-pod2-propagationpolicy
+  namespace: zookeeper-system
+spec:
+  propagateDeps: true
+  resourceSelectors:
+    - apiVersion: v1
+      kind: Pod
+      name: multicluster-zk-1-2
+  placement:
+    clusterAffinity:
+      clusterNames:
+      - new-mid-rz
+

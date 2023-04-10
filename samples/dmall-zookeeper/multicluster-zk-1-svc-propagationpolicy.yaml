@@ -1,0 +1,18 @@
+apiVersion: policy.karmada.io/v1alpha1
+kind: PropagationPolicy
+metadata:
+  name: multicluster-zk-1-svc-propagationpolicy
+  namespace: zookeeper-system
+spec:
+  resourceSelectors:
+    - apiVersion: v1
+      kind: Service
+      labelSelector:
+        matchLabels:
+          app: multicluster-zk-1
+          controller-by: zookeeper-manager
+  placement:
+    clusterAffinity:
+      clusterNames:
+        - new-mid
+        - new-mid-rz

@@ -4,7 +4,9 @@ metadata:
   name: multicluster-zk-1
   namespace: zookeeper-system
 spec:
-  replicas: 2
+  labels:
+    virtuoso-dns.dmall.com/name: multicluster-zk-1
+  replicas: 5
   image: dmall-bj.tencentcloudcr.com/symcn/dmall-zookeeper:3.4.14
   persistence:
     reclaimPolicy: Delete
@@ -30,7 +32,7 @@ spec:
       - name: dmall-bj-tencentcloudcr-registry-secret
   clientService:
     annotations:
-      service.kubernetes.io/qcloud-loadbalancer-internal-subnetid: "subnet-d90xxx8r"
+      service.kubernetes.io/qcloud-loadbalancer-internal-subnetid: "subnet-6fvy27e7"
     type: LoadBalancer
   config:
     initLimit: 5
