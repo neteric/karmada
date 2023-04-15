@@ -2,40 +2,107 @@
 
 skin rose
 
-title "Messages - Sequence Diagram"
+title "Karmada ExecuteController and WorkStatusController"
 
 
 
 actor User
-database "KarmadaEtcd" as cp
-database "Member1" as m1
-database "Member2" as m2
+database "ApiServer" as cp
 
-entity "WorkStatus" as wsc
+
 entity "Execute" as exec
+entity "WorkStatus" as wsc
 
 
-cp -> wsc: work(manifest:pod) event: (create, update, delete)
-cp -> exec:  work(manifest:pod) event: (create, update, delete)
+' database "Member1" as m1
+' database "Member2" as m2
 
+User -> cp: work
+cp -> exec : Watch
+note right
+Work
+end note
 
-group exec
-    cp -> exec: work event: (create, update, delete)
-    exec -> m1: pod action: (create, update, delete)
-    exec -> m2: pod action: (create, update, delete)
-    exec -> cp: update work status-conditions
+cp -> exec: Work Event（Create,Update,Delete)
+
+group DeleteEvent
+    exec -> exec: get cluster name from work.Namespace
+    exec -> cp: get cluster Obj 
+    group Case ClusterReady
+        exec -> exec: if ClusterReady,delete Workload
+        exec -> cp: remove finializer
+    end
+    group Case ClusterNotReady and not terminating
+        exec -> cp: requeue delete event
+    end
 end
 
-wsc -> m1: watch pod
-wsc -> m2: watch pod
-
-
-group workstatus
-    m1 -> wsc: pod event: (create, update, delete)
-    m2 -> wsc: pod event: (create, update, delete)
-    wsc -> m1: pod action: (recreate, update)
-    wsc -> m2: pod action: (recreate, update)
-    wsc -> cp: update work status
+group CreateOrUpdate Event
+    loop every manifests
+        group create Workload, if not exists
+            exec -> cp: create Workload
+            exec -> cp: recordVersion about generation or resourceVersion
+        end
+        group update Workload if exists
+            exec -> cp: jude allowUpdate
+            exec -> exec: retainClusterField
+            exec -> cp: update workload
+            exec -> cp: recordVersion about generation or resourceVersion
+        end
+    end
 end
+' group exec
+'     cp -> exec: work event: (create, update, delete)
+'     exec -> m1: pod action: (create, update, delete)
+'     exec -> m2: pod action: (create, update, delete)
+'     exec -> cp: update work status-conditions
+' end
+
+' wsc -> m1: watch pod
+' wsc -> m2: watch pod
+
+
+' group workstatus
+'     m1 -> wsc: pod event: (create, update, delete)
+'     m2 -> wsc: pod event: (create, update, delete)
+'     wsc -> m1: pod action: (recreate, update)
+'     wsc -> m2: pod action: (recreate, update)
+'     wsc -> cp: update work status
+' end
+
+cp -> wsc : Watch
+
+note right
+Work
+end note
+wsc -> wsc: buildResourceInformers
+
+cp -> wsc: Watch
+
+note right
+Resource In Manifests, such as Pod
+end note
+
+cp -> wsc: Pod Event（Create,Update,Delete)
+
+group Delete Event
+    wsc -> cp: recreate this Pod
+end
+
+wsc -> cp: get observedObj
+
+group Update Event
+
+    wsc -> wsc: jude this pod own by karmada
+    wsc -> wsc: get workObject
+    wsc -> wsc: get desiredObj from workObject
+
+    group jude NeedUpdate
+        wsc -> wsc: if recordVersion != observedObj.Version, return true
+    end
+    wsc -> cp: Update workload
+end
+
+wsc -> cp: reflectStatus
 
 @enduml

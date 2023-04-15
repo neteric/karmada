@@ -17,8 +17,8 @@ OverridePolicy
 ClusterOverridePolicy
 end note
 
-ApiServer -> binding: ResourceBinding Event（Create,Update,Delete)
-group DeleteEvent
+ApiServer -> binding: ResourceBinding Event（Create,Update,Delete) 
+group DeleteEvent(Trigger by GC or User Delete)
     binding -> ApiServer: if !binding.DeletionTimestamp.IsZero(), Delete Work About this RB
     binding -> ApiServer: removeFinalizer
 end
@@ -26,7 +26,7 @@ end
 group UpdateEvent
     binding -> ApiServer: deleting this orphan Works
     note right
-        if RB updated and cluster update, if works.clusters not in rb
+        When RB's cluster update
     end note
 end
 
@@ -39,8 +39,8 @@ end note
 binding -> binding: revise replica for rb in member cluster
 binding -> binding: ApplyOverridePolicies
 binding -> binding: RecordAppliedOverrides
-
-binding -> ApiServer: CreateOrUpdateWork 
-
+loop Every Cluster
+    binding -> ApiServer: CreateOrUpdateWork 
+end 
 @enduml
 

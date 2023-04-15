@@ -21,7 +21,7 @@ ApiServer -> dd: RB Event（update, delete） fileter: bindingObject.Spec.Propag
 
 group DeleteEvent
     dd -> dd: if RB is not exists or RB.deletetimestrip != 0
-    dd -> dd: list AttachedBinding by this Rb, this rb is used AttachedBindings
+    dd -> dd: list AttachedBinding by this Rb
     dd -> ApiServer: delete label depended-by from used attatchBindings
     dd -> ApiServer: delete requiredBy from used attatchBindings.Spec
     note right
@@ -29,25 +29,26 @@ group DeleteEvent
     end note
 end
 
-dd -> dd: if ! bindingObject.Spec.PropagateDeps, handleResourceBindingDeletion
-dd -> ApiServer: get workload from rb
-dd -> dd: get workload dependencies from ResourceInterpreter
-dd -> dd: record DependenciesForIndependentBinding to annotations
-dd -> dd: if rb.workload update, maybe some attached binding no need
+group UpdateEvent
+    dd -> dd: if users set PropagateDeps field from "true" to "false" \n handleResourceBindingDeletion
+    dd -> ApiServer: get workload from rb
+    dd -> dd: get workload dependencies from ResourceInterpreter
+    dd -> dd: record DependenciesForIndependentBinding to annotations
 
-group remove orphan attached bindings
-    dd -> ApiServer: findOrphanAttachedResourceBindings
-    dd -> ApiServer: delete label depended-by from Orphan attatchBindings
-    dd -> ApiServer: delete requiredBy from Orphan attatchBindings.Spec
+    group remove orphan attached bindings
+        dd -> ApiServer: findOrphanAttachedResourceBindings
+        dd -> ApiServer: delete label depended-by from Orphan attatchBindings
+        dd -> ApiServer: delete requiredBy from Orphan attatchBindings.Spec
+    end
+
+    loop every dependencies
+        dd -> ApiServer: get rawObject from dependencies
+        dd -> dd: if Object not exists, do nothing
+        dd -> dd: buildAttachedBinding
+        dd -> ApiServer: createOrUpdate AttachedBinding
+    end
 end
 
-group create or update attached bindings
-    dd -> ApiServer: get rawObject from dependencies
-    dd -> dd: if Object not exists, do nothing
-    dd -> dd: buildAttachedBinding
-    dd -> ApiServer: createOrUpdate AttachedBinding
-
-end
 
 ApiServer -> dd: Object Event(create, update, delete)
 dd -> dd: list all rb in Object ns

@@ -15,33 +15,39 @@ entity "DetectorController" as dc
 User -> ApiServer : Resource
 User -> ApiServer : PropagationPolicy
 User -> ApiServer : ClusterPropagationPolicy
-User -> ApiServer : Cluster
-User -> ApiServer : OverridePolicy
 ApiServer -> dc : Watch
 
 note right
 All Resource（like Pod）
 PropagationPolicy
 ClusterPropagationPolicy
-Cluster
 end note
 
 group reconcile policy
     ApiServer -> dc: PropagationPolicy Event(delete)
     dc -> ApiServer: delete label on ResourceBinding and Resource, rb and resource not delete
-end
+
 
 group handle policy create or update event
     ApiServer -> dc: PropagationPolicy Event(update)
-    dc -> dc: reconcile rb, \nget selector from policy, \nget object from rb,\ncheck objects are no longer match the current policy
-    dc -> dc: if policy update resoruceSelector,  delete label on Resource and RB, update rb 
-    dc -> dc: if policy updated other than resourceSelector, like cluster, get all rb filter by policy, get object from rb, enqueue object
-
     note right
         policy更新了resoruceSelector的情况，只会将原来匹配的Object和RB的Label移除,不会删除
     end note
+    group resourceSelector changed
+        dc -> dc: reconcile rb, list rb according rb's label = policyName, \nget object from rb,\ncheck objects are no longer match the current policy
+        dc -> ApiServer: delete label on Resource and RB, update RB
+    end
+    
+    group placement changed
+        ApiServer -> dc: get all rb filter by policy, get object from rb, enqueue object
+        dc -> ApiServer: Update RB
+    end
+
+
     ApiServer -> dc: PropagationPolicy Event(create or update)
     dc -> dc: get object from waitingQueue, enqueue object to own queue
+end
+
 end
 group reconcile Object
     dc -> dc: get Object Event from ownqueue(create, delete, update)

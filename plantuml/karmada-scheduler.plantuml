@@ -17,6 +17,17 @@ ClusterResourceBinding
 Cluster
 end note
 
+ApiServer -> sch: ResourceBindingEvent(Create, Update)
+ApiServer -> sch: ClusterResourceBindingEvent(Create, Update)
+ApiServer -> sch: ResourceBindingEvent(Create, Update, Delete)
+
+== 调度算法 ==
+
+sch -> ApiServer: Update ResourceBinding.Spec.Cluster
+sch -> ApiServer: Update ResourceBinding.Status.schedulerObservedGeneration
+sch -> ApiServer: Update ResourceBinding.Status.Condition
+sch -> ApiServer: Update ResourceBinding.Status.schedulerObservingAffinityName
+
 sch -> ApiServer : ResourceBinding.Spec.Cluster
 
 @enduml

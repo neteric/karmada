@@ -7,6 +7,9 @@ title "Karmada Cluster Controller"
 
 database "ApiServer" as ApiServer
 entity "ClusterController" as cc
+entity "TaintManager" as tm
+entity "ClusterStatusController" as csc
+
 
 
 ApiServer -> cc : Watch
@@ -15,8 +18,68 @@ note right
 Cluster
 end note
 
+ApiServer -> tm : Watch
+
+note right
+Cluster
+end note
+
+
+ApiServer -> csc : Watch
+
+note right
+Cluster
+end note
+
+
 ApiServer -> cc: Cluster Event（Create,Update,Delete)
 
+group DeleteEvent
+    cc -> ApiServer: add NoExecute taints to Cluster
+    ApiServer -> TaintManager: Remove Cluster from RB'Spec
+
+    cc -> ApiServer: delete ExecutionSpace namespace 
+    loop until ExecutionSpace namespace deleted
+        cc -> cc: requeue event
+    end
+    cc -> cc: delete health data from cluster healthMap
+    group If EnableTaintManager 
+        loop until all resourcebinding Removed
+            cc -> cc: requeue event
+        end
+    end 
+    cc -> ApiServer: remove Cluster's Finalizer
+end
+
+group CreateOrUpdate Event
+    cc -> ApiServer: create ExecutionSpace namespace
+    cc -> ApiServer: add or remove taints to Cluster according to \n cluster.Status.ReadyConditions
+    note right
+        ConditionFalse: NoSchedule
+        ConditionUnknown: NoSchedule
+        ConditionTrue: remove NoSchedule
+    end note
+    cc -> ApiServer: add NoSchedule taint to cluster, if ReadyCondition nil
+    cc -> ApiServer: ensure finalizer
+end
+
+
+
+loop monitorClusterHealth: every 5s 
+    group Push Mode       
+        cc -> ApiServer: get cluster
+        cc -> cc: update clusterHealthMap if changed, \n create clusterHealth if nil
+    end
+    cc -> ApiServer: if enable Failover: \n add or remove taints to Cluster \n according to observedReadyCondition
+    note right
+        ConditionFalse: NoSchedule
+        ConditionUnknown: NoSchedule
+        ConditionTrue: remove NoSchedule
+    end note
+    ApiServer -> TaintManager: Remove Cluster from RB'Spec
+
+
+end
 
 @enduml
 
