@@ -1,0 +1,18 @@
+apiVersion: policy.karmada.io/v1alpha1
+kind: PropagationPolicy
+metadata:
+  name: multicluster-mysql-1-svc-propagationpolicy
+  namespace: virtuoso-mysql
+spec:
+  resourceSelectors:
+    - apiVersion: v1
+      kind: Service
+      name: multicluster-mysql-1-mysql-master
+    - apiVersion: v1
+      kind: Service
+      name: multicluster-mysql-1-mysql-replicas
+  placement:
+    clusterAffinity:
+      clusterNames:
+        - new-mid
+        - new-mid-rz

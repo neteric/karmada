@@ -1,0 +1,15 @@
+apiVersion: policy.karmada.io/v1alpha1
+kind: PropagationPolicy
+metadata:
+  name: multicluster-mysql-1-pod0-propagationpolicy
+  namespace: virtuoso-mysql
+spec:
+  propagateDeps: true
+  resourceSelectors:
+    - apiVersion: v1
+      kind: Pod
+      name: multicluster-mysql-1-mysql-0
+  placement:
+    clusterAffinity:
+      clusterNames:
+      - new-mid

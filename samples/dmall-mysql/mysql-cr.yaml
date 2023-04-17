@@ -1,0 +1,30 @@
+apiVersion: mysql.presslabs.org/v1alpha1
+kind: MysqlCluster
+metadata:
+  name: multicluster-mysql-1
+  namespace: virtuoso-mysql
+spec:
+  replicas: 2
+  secretName: multicluster-mysql-1
+  mysqlVersion: "8.0.31"
+  image: dmall-bj.tencentcloudcr.com/symcn/mysql-dmall:v8.0.31-alpha.1
+  servicePolicy:
+    lbService: true
+    annotations:
+      service.kubernetes.io/qcloud-loadbalancer-internal-subnetid: subnet-6fvy27e7
+  podSpec:
+    imagePullSecrets:
+      - name: dmallbj
+  labels:
+    virtuoso-dns.dmall.com/name: multicluster-mysql-1
+#  initFileExtraSQL:
+#  - grant all on *.* to root@'%'
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: multicluster-mysql-1
+  namespace: virtuoso-mysql
+type: Opaque
+data:
+  ROOT_PASSWORD: bm90LXNvLXNlY3VyZTI=
